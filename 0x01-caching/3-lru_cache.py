@@ -4,78 +4,50 @@
 from base_caching import BaseCaching
 
 
-class Node:
-    """ Node defines
-    """
-    def __init__(self, k, v):
-        """ Initiliaze
-        """
-        self.key = k
-        self.val = v
-        self.prev = None
-        self.next = None
-
-
 class LRUCache(BaseCaching):
     """ LRUCache defines:
+      - constants of your caching system
+      - where your data are stored (in a dictionary)
     """
 
     def __init__(self):
         """ Initiliaze
         """
         super().__init__()
-
-        """head and tail of the linkedlist"""
-        self.head = Node("#", 0)
-        self.tail = Node("_", 0)
-        self.head.next = self.tail
-        self.tail.prev = self.head
+        self.dp = []
 
     def put(self, key, item):
         """ Add an item in the cache
         """
         if key is None or item is None:
             return
-        if key in self.cache_data:
-            self._remove(self.cache_data.get(key))
-        newNode = Node(key, item)
-        self._add(newNode)
-        self.cache_data[key] = newNode
-        if len(self.cache_data) > BaseCaching.MAX_ITEMS:
-            nodeToRemove = self.tail.prev
-            self._remove(nodeToRemove)
-            print("DISCARD:", nodeToRemove.key)
-            del self.cache_data[nodeToRemove.key]
+        if key not in self.cache_data:
+            if len(self.dp) == BaseCaching.MAX_ITEMS:
+                # delete least recently used element
+                last = self.dp[-1]
+                # Pops the last element
+                ele = self.dp.pop()
+                print("DISCARD:", last)
+                # Erase the last
+                del self.cache_data[last]
+        else:
+            del self.dp[0]
+
+        # update reference
+        if key in self.dp:
+            self.dp.remove(key)
+            self.dp.insert(0, key)
+            del self.cache_data[key]
+            self.cache_data[key] = item
+        else:
+            self.dp.insert(0, key)
+            self.cache_data[key] = item
 
     def get(self, key):
         """ Get an item by key
         """
-        if key is None or key not in self.cache_data.keys():
-            return None
-        node = self.cache_data.get(key)
-        self._remove(node)
-        self._add(node)
-        return node.val
-
-    def _remove(self, node):
-        """remove node"""
-        prevNode = node.prev
-        nextNode = node.next
-        prevNode.next = node.next
-        nextNode.prev = prevNode
-
-    def _add(self, node):
-        """add node"""
-        nextNode = self.head.next
-        prevNode = self.head
-        prevNode.next = node
-        nextNode.prev = node
-        node.next = nextNode
-        node.prev = prevNode
-
-    def print_cache(self):
-        """ Print the cache
-        """
-        print("Current cache:")
-        for key in sorted(self.cache_data.keys()):
-            print("{}: {}".format(key, self.cache_data.get(key).val))
+        item = self.cache_data.get(key, None)
+        if key in self.dp:
+            self.dp.remove(key)
+            self.dp.insert(0, key)
+        return item
