@@ -8,7 +8,6 @@ my_cache.put("B", "World")
 my_cache.put("C", "Holberton")
 my_cache.put("D", "School")
 my_cache.print_cache()
-"""
 print(my_cache.get("B"))
 my_cache.put("E", "Battery")
 my_cache.print_cache()
@@ -28,4 +27,4 @@ my_cache.print_cache()
 my_cache.put("J", "J")
 my_cache.print_cache()
 my_cache.put("K", "K")
-my_cache.print_cache()"""
+my_cache.print_cache()

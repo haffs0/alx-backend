@@ -1,19 +1,20 @@
 #!/usr/bin/python3
-""" MRUCache module
+""" LRUCache module
 """
-from collections import OrderedDict
 from base_caching import BaseCaching
 
 
 class MRUCache(BaseCaching):
-    """ MRUCache defines
+    """ MRUCache defines:
+      - constants of your caching system
+      - where your data are stored (in a dictionary)
     """
 
     def __init__(self):
         """ Initiliaze
         """
         super().__init__()
-        self.cache_data = OrderedDict()
+        self.dp = []
 
     def put(self, key, item):
         """ Add an item in the cache
@@ -21,18 +22,32 @@ class MRUCache(BaseCaching):
         if key is None or item is None:
             return
         if key not in self.cache_data:
-            if len(self.cache_data) + 1 > BaseCaching.MAX_ITEMS:
-                mru_key, _ = self.cache_data.popitem(False)
-                print("DISCARD:", mru_key)
-                self.cache_data[key] = item
-                self.cache_data.move_to_end(key, last=False)
+            if len(self.dp) == BaseCaching.MAX_ITEMS:
+                # delete least recently used element
+                last = self.dp[0]
+                # Pops the last element
+                ele = self.dp.pop()
+                print("DISCARD:", last)
+                # Erase the last
+                del self.cache_data[last]
         else:
+            del self.dp[0]
+
+        # update reference
+        if key in self.dp:
+            self.dp.remove(key)
+            self.dp.insert(0, key)
+            del self.cache_data[key]
             self.cache_data[key] = item
-        print(self.cache_data.keys())
+        else:
+            self.dp.insert(0, key)
+            self.cache_data[key] = item
 
     def get(self, key):
         """ Get an item by key
         """
-        if key is not None or key in self.cache_data:
-            self.cache_data.move_to_end(key, last=False)
-        return self.cache_data.get(key, None)
+        item = self.cache_data.get(key, None)
+        if key in self.dp:
+            self.dp.remove(key)
+            self.dp.insert(0, key)
+        return item
